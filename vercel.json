@@ -2,7 +2,7 @@
   "version": 2,
   "framework": null,
   "outputDirectory": "dist",
-  "buildCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build && mkdir -p dist/build && cp -r public/build/. dist/build/ && cp public/favicon.ico dist/ 2>/dev/null; cp public/robots.txt dist/ 2>/dev/null; true",
+  "buildCommand": "npm ci && npm run build && mkdir -p dist/build && cp -r public/build/. dist/build/ && cp public/favicon.ico dist/ 2>/dev/null; cp public/robots.txt dist/ 2>/dev/null; true",
   "installCommand": "npm install",
   "functions": {
     "api/index.php": {
