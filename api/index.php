@@ -2,6 +2,13 @@
 
 chdir(dirname(__DIR__));
 
+// Fail fast with a clear message if APP_KEY is missing.
+if (getenv('APP_KEY') === false || getenv('APP_KEY') === '') {
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    exit('Server configuration error: APP_KEY is not set. Add it in your Vercel Project → Settings → Environment Variables.');
+}
+
 // Serverless-safe defaults — only applied if the variable isn't already
 // set in the Vercel environment dashboard.
 $defaults = [
