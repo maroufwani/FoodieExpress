@@ -17,9 +17,9 @@
              :class="'toast-' + toast.type"
              style="animation: slideIn 0.25s ease">
             <span class="text-lg leading-none mt-0.5">
-                <template x-if="toast.type==='success'">✅</template>
-                <template x-if="toast.type==='error'">❌</template>
-                <template x-if="toast.type==='info'">ℹ️</template>
+                <span x-show="toast.type==='success'">✅</span>
+                <span x-show="toast.type==='error'">❌</span>
+                <span x-show="toast.type==='info'">ℹ️</span>
             </span>
             <p class="text-sm font-medium text-gray-800 flex-1" x-text="toast.msg"></p>
             <button @click="$store.notify.remove(toast.id)" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
