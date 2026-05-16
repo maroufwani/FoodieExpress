@@ -14,7 +14,7 @@ foreach ([
 // All three superglobals + putenv() are set so every env-reader in Laravel
 // (phpdotenv adapters, getenv(), $_ENV, $_SERVER) sees our values, even when
 // the Vercel dashboard has conflicting entries (e.g. LOG_CHANNEL=stack).
-foreach ([
+$overrides = [
     'LOG_CHANNEL'        => 'stderr',
     'SESSION_DRIVER'     => 'cookie',
     'CACHE_STORE'        => 'array',
@@ -25,7 +25,17 @@ foreach ([
     'APP_PACKAGES_CACHE' => '/tmp/packages.php',
     'APP_ROUTES_CACHE'   => '/tmp/routes.php',
     'APP_SERVICES_CACHE' => '/tmp/services.php',
-] as $key => $value) {
+];
+
+// Vercel terminates TLS at the edge; PHP sees plain HTTP.
+// Force ASSET_URL to https:// so @vite() never emits http:// links.
+// (trustProxies in bootstrap/app.php fixes this for runtime URL generation;
+//  this covers the config-loading phase before middleware runs.)
+if (!empty($_SERVER['HTTP_HOST'])) {
+    $overrides['ASSET_URL'] = 'https://' . $_SERVER['HTTP_HOST'];
+}
+
+foreach ($overrides as $key => $value) {
     putenv("$key=$value");
     $_ENV[$key] = $_SERVER[$key] = $value;
 }
