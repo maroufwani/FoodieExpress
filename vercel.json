@@ -1,6 +1,7 @@
 {
   "version": 2,
   "framework": null,
+  "outputDirectory": "public",
   "buildCommand": "npm ci && npm run build",
   "installCommand": "npm install",
   "functions": {
@@ -10,12 +11,8 @@
   },
   "routes": [
     {
-      "src": "/build/(.*)",
-      "dest": "/public/build/$1"
-    },
-    {
-      "src": "/(favicon\\.ico|robots\\.txt|apple-touch-icon\\.png)",
-      "dest": "/public/$1"
+      "src": ".*\\.php$",
+      "dest": "/api/index.php"
     },
     {
       "handle": "filesystem"
