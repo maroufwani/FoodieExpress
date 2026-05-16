@@ -40,4 +40,12 @@ foreach ($overrides as $key => $value) {
     $_ENV[$key] = $_SERVER[$key] = $value;
 }
 
+// Fix Symfony base-URL detection.
+// vercel-php sets SCRIPT_NAME=/api/index.php; Symfony then treats dirname (/api)
+// as the base URL and strips it from every REQUEST_URI that starts with /api/…
+// (e.g. /api/restaurants → /restaurants → no route → 404).
+// Resetting to /index.php makes dirname resolve to '' so the full path is kept.
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+$_SERVER['PHP_SELF']    = '/index.php';
+
 require __DIR__ . '/../public/index.php';
