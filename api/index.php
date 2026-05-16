@@ -6,7 +6,14 @@ chdir(dirname(__DIR__));
 if (getenv('APP_KEY') === false || getenv('APP_KEY') === '') {
     http_response_code(500);
     header('Content-Type: text/plain');
-    exit('Server configuration error: APP_KEY is not set. Add it in your Vercel Project → Settings → Environment Variables.');
+    exit('Config error: APP_KEY is not set. Add it in Vercel Project → Settings → Environment Variables.');
+}
+
+// Ensure vendor/ was built by the vercel-php runtime.
+if (!file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    exit('Config error: vendor/autoload.php not found. Composer dependencies were not installed.');
 }
 
 // Serverless-safe defaults — only applied if the variable isn't already
@@ -47,6 +54,18 @@ if (file_exists(dirname(__DIR__) . '/storage/framework/maintenance.php')) {
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-$app = require_once dirname(__DIR__) . '/bootstrap/app.php';
-
-$app->handleRequest(Illuminate\Http\Request::capture());
+// Wrap bootstrap in a try/catch so we see the real error.
+// Set APP_DEBUG=true in Vercel dashboard to expose the message.
+try {
+    $app = require_once dirname(__DIR__) . '/bootstrap/app.php';
+    $app->handleRequest(Illuminate\Http\Request::capture());
+} catch (\Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    if (getenv('APP_DEBUG') === 'true') {
+        exit('[DEBUG] ' . get_class($e) . ': ' . $e->getMessage()
+            . "\nFile: " . $e->getFile() . ':' . $e->getLine()
+            . "\n\n" . $e->getTraceAsString());
+    }
+    exit('Server error. Set APP_DEBUG=true in Vercel environment variables to see details.');
+}
