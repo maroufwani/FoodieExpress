@@ -80,6 +80,3 @@ try {
     }
     exit('Server error. Set APP_DEBUG=true in Vercel environment variables to see details.');
 }
-
-    exit('Server error. Set APP_DEBUG=true in Vercel environment variables to see details.');
-}
