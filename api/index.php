@@ -16,21 +16,32 @@ if (!file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     exit('Config error: vendor/autoload.php not found. Composer dependencies were not installed.');
 }
 
-// Serverless-safe defaults — only applied if the variable isn't already
-// set in the Vercel environment dashboard.
-$defaults = [
-    'APP_ENV'              => 'production',
-    'APP_DEBUG'            => 'false',
-    'LOG_CHANNEL'          => 'stderr',      // no filesystem writes
-    'SESSION_DRIVER'       => 'cookie',      // no filesystem writes
-    'CACHE_STORE'          => 'array',       // in-memory, no filesystem writes
+// Vercel's filesystem is read-only. Force these unconditionally so they
+// override anything set in the Vercel dashboard that would write to disk.
+$forced = [
+    'LOG_CHANNEL'          => 'stderr',  // write logs to stderr, never to disk
+    'LOG_STACK'            => 'stderr',
+    'SESSION_DRIVER'       => 'cookie',  // store sessions in encrypted cookies
+    'CACHE_STORE'          => 'array',   // in-memory cache, never to disk
     'QUEUE_CONNECTION'     => 'sync',
     'BROADCAST_CONNECTION' => 'log',
-    'FILESYSTEM_DISK'      => 'local',
+];
+
+foreach ($forced as $key => $value) {
+    putenv("$key=$value");
+    $_ENV[$key]    = $value;
+    $_SERVER[$key] = $value;
+}
+
+// These are only applied if not already set in the Vercel dashboard.
+$defaults = [
+    'APP_ENV'        => 'production',
+    'APP_DEBUG'      => 'false',
+    'FILESYSTEM_DISK'=> 'local',
 ];
 
 foreach ($defaults as $key => $value) {
-    if (getenv($key) === false && empty($_ENV[$key])) {
+    if (getenv($key) === false || getenv($key) === '') {
         putenv("$key=$value");
         $_ENV[$key]    = $value;
         $_SERVER[$key] = $value;
